@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Volt Vending — Automated Vaping, Elevated</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            volt: {
+              purple: '#A855F7',
+              'purple-light': '#D8B4FE',
+              'purple-dark': '#7C3AED',
+              'purple-deep': '#4C1D95',
+              cyan: '#22D3EE',
+              'cyan-light': '#A5F3FC',
+              'cyan-dark': '#0891B2',
+              pink: '#EC4899',
+              bg: '#060610',
+              'bg-2': '#0D0D1A',
+              'bg-3': '#12122A',
+              'bg-card': '#0F0F20',
+            }
+          },
+          fontFamily: {
+            display: ['Space Grotesk', 'sans-serif'],
+            body: ['Inter', 'sans-serif'],
+          },
+          letterSpacing: {
+            tight: '-0.03em',
+          },
+          lineHeight: {
+            relaxed: '1.7',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      background-color: #060610;
+      font-family: 'Inter', sans-serif;
+      color: #e2e8f0;
+      overflow-x: hidden;
+    }
+
+    /* Noise texture overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
+
+    /* Radial glow backgrounds */
+    .glow-purple {
+      background: radial-gradient(ellipse 60% 50% at 20% 30%, rgba(168, 85, 247, 0.18) 0%, transparent 70%),
+                  radial-gradient(ellipse 50% 60% at 80% 70%, rgba(124, 58, 237, 0.12) 0%, transparent 70%);
+    }
+    .glow-cyan {
+      background: radial-gradient(ellipse 50% 50% at 70% 20%, rgba(34, 211, 238, 0.15) 0%, transparent 70%),
+                  radial-gradient(ellipse 40% 50% at 30% 80%, rgba(8, 145, 178, 0.10) 0%, transparent 70%);
+    }
+
+    /* Neon text glow */
+    .neon-purple {
+      text-shadow: 0 0 20px rgba(168, 85, 247, 0.8), 0 0 40px rgba(168, 85, 247, 0.4), 0 0 80px rgba(168, 85, 247, 0.2);
+    }
+    .neon-cyan {
+      text-shadow: 0 0 20px rgba(34, 211, 238, 0.8), 0 0 40px rgba(34, 211, 238, 0.4);
+    }
+
+    /* Gradient text */
+    .grad-text {
+      background: linear-gradient(135deg, #A855F7 0%, #22D3EE 60%, #EC4899 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .grad-text-2 {
+      background: linear-gradient(135deg, #22D3EE 0%, #A855F7 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Cards */
+    .card-glow {
+      background: linear-gradient(145deg, rgba(15,15,32,0.9) 0%, rgba(12,12,26,0.95) 100%);
+      border: 1px solid rgba(168, 85, 247, 0.2);
+      box-shadow:
+        0 0 0 1px rgba(168, 85, 247, 0.05),
+        0 4px 24px rgba(0,0,0,0.5),
+        0 0 40px rgba(168, 85, 247, 0.05) inset;
+      transition: border-color 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  box-shadow 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .card-glow:hover {
+      border-color: rgba(168, 85, 247, 0.5);
+      box-shadow:
+        0 0 0 1px rgba(168, 85, 247, 0.15),
+        0 8px 40px rgba(0,0,0,0.6),
+        0 0 60px rgba(168, 85, 247, 0.12) inset;
+      transform: translateY(-3px);
+    }
+
+    .card-cyan {
+      background: linear-gradient(145deg, rgba(15,15,32,0.9) 0%, rgba(12,12,26,0.95) 100%);
+      border: 1px solid rgba(34, 211, 238, 0.2);
+      box-shadow:
+        0 0 0 1px rgba(34, 211, 238, 0.05),
+        0 4px 24px rgba(0,0,0,0.5),
+        0 0 40px rgba(34, 211, 238, 0.05) inset;
+      transition: border-color 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  box-shadow 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .card-cyan:hover {
+      border-color: rgba(34, 211, 238, 0.5);
+      box-shadow:
+        0 0 0 1px rgba(34, 211, 238, 0.15),
+        0 8px 40px rgba(0,0,0,0.6),
+        0 0 60px rgba(34, 211, 238, 0.12) inset;
+      transform: translateY(-3px);
+    }
+
+    /* Buttons */
+    .btn-primary {
+      background: linear-gradient(135deg, #A855F7, #7C3AED);
+      box-shadow: 0 0 20px rgba(168, 85, 247, 0.4), 0 4px 16px rgba(0,0,0,0.4);
+      transition: box-shadow 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  opacity 0.2s;
+    }
+    .btn-primary:hover {
+      box-shadow: 0 0 32px rgba(168, 85, 247, 0.7), 0 6px 24px rgba(0,0,0,0.5);
+      transform: translateY(-2px);
+    }
+    .btn-primary:active {
+      transform: translateY(0);
+      opacity: 0.9;
+    }
+    .btn-primary:focus-visible {
+      outline: 2px solid #A855F7;
+      outline-offset: 3px;
+    }
+
+    .btn-outline {
+      border: 1px solid rgba(34, 211, 238, 0.5);
+      color: #22D3EE;
+      background: rgba(34, 211, 238, 0.05);
+      box-shadow: 0 0 12px rgba(34, 211, 238, 0.1);
+      transition: background 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  box-shadow 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  border-color 0.25s;
+    }
+    .btn-outline:hover {
+      background: rgba(34, 211, 238, 0.12);
+      border-color: rgba(34, 211, 238, 0.8);
+      box-shadow: 0 0 24px rgba(34, 211, 238, 0.25);
+      transform: translateY(-2px);
+    }
+    .btn-outline:active {
+      transform: translateY(0);
+    }
+    .btn-outline:focus-visible {
+      outline: 2px solid #22D3EE;
+      outline-offset: 3px;
+    }
+
+    /* Nav */
+    nav {
+      background: rgba(6, 6, 16, 0.8);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(168, 85, 247, 0.1);
+    }
+
+    /* Divider line */
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent 0%, rgba(168, 85, 247, 0.3) 30%, rgba(34, 211, 238, 0.3) 70%, transparent 100%);
+    }
+
+    /* Step number circle */
+    .step-num {
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(34, 211, 238, 0.2));
+      border: 1px solid rgba(168, 85, 247, 0.4);
+      box-shadow: 0 0 20px rgba(168, 85, 247, 0.2);
+    }
+
+    /* Icon glow wrapper */
+    .icon-wrap {
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(34, 211, 238, 0.15));
+      border: 1px solid rgba(168, 85, 247, 0.25);
+      box-shadow: 0 0 20px rgba(168, 85, 247, 0.15);
+    }
+    .icon-wrap-cyan {
+      background: linear-gradient(135deg, rgba(34, 211, 238, 0.15), rgba(168, 85, 247, 0.1));
+      border: 1px solid rgba(34, 211, 238, 0.25);
+      box-shadow: 0 0 20px rgba(34, 211, 238, 0.15);
+    }
+
+    /* Star */
+    .star { color: #FBBF24; }
+
+    /* Nav link */
+    .nav-link {
+      color: rgba(226, 232, 240, 0.6);
+      transition: color 0.2s;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+    .nav-link:hover { color: #e2e8f0; }
+    .nav-link:focus-visible { outline: 2px solid #A855F7; border-radius: 4px; }
+
+    /* Horizontal rule gradient */
+    hr { border: none; }
+
+    /* Machine graphic */
+    .machine-body {
+      background: linear-gradient(160deg, #1a1a35 0%, #0d0d20 60%, #0a0a18 100%);
+      border: 1px solid rgba(168, 85, 247, 0.35);
+      box-shadow:
+        0 0 0 1px rgba(168, 85, 247, 0.08),
+        -8px 0 40px rgba(168, 85, 247, 0.15),
+        8px 0 40px rgba(34, 211, 238, 0.1),
+        0 20px 80px rgba(0,0,0,0.7);
+    }
+    .screen-glow {
+      background: linear-gradient(160deg, rgba(168, 85, 247, 0.08) 0%, rgba(34, 211, 238, 0.1) 100%);
+      border: 1px solid rgba(34, 211, 238, 0.3);
+      box-shadow: 0 0 30px rgba(34, 211, 238, 0.2) inset, 0 0 20px rgba(34, 211, 238, 0.15);
+    }
+
+    /* Scroll reveal */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.6s cubic-bezier(0.34, 1.2, 0.64, 1),
+                  transform 0.6s cubic-bezier(0.34, 1.2, 0.64, 1);
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Pulse dot */
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+    .pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
+
+    /* Floating animation */
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+    .float-anim { animation: float 4s ease-in-out infinite; }
+
+    /* Gradient border beam */
+    @keyframes beam {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Hero badge */
+    .hero-badge {
+      background: rgba(168, 85, 247, 0.1);
+      border: 1px solid rgba(168, 85, 247, 0.3);
+      box-shadow: 0 0 20px rgba(168, 85, 247, 0.15);
+    }
+
+    /* Contact form inputs */
+    .form-input {
+      background: rgba(15, 15, 32, 0.8);
+      border: 1px solid rgba(168, 85, 247, 0.2);
+      color: #e2e8f0;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-input:focus {
+      outline: none;
+      border-color: rgba(168, 85, 247, 0.6);
+      box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1), 0 0 20px rgba(168, 85, 247, 0.1);
+    }
+    .form-input::placeholder { color: rgba(148, 163, 184, 0.4); }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #060610; }
+    ::-webkit-scrollbar-thumb { background: rgba(168, 85, 247, 0.4); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(168, 85, 247, 0.7); }
+  </style>
+</head>
+<body class="font-body">
+
+  <!-- NAV -->
+  <nav class="fixed top-0 left-0 right-0 z-50">
+    <div class="max-w-7xl mx-auto px-6 lg:px-10 flex items-center justify-between h-16">
+      <!-- Logo -->
+      <a href="#" class="flex items-center gap-2.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-volt-purple rounded-lg">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background: linear-gradient(135deg, #A855F7, #22D3EE); box-shadow: 0 0 16px rgba(168,85,247,0.5);">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <path d="M9 2L4 9H8L7 14L12 7H8L9 2Z" fill="white" stroke="white" stroke-width="0.5" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="font-display font-700 text-white text-lg" style="letter-spacing: -0.03em;">Volt<span class="grad-text">Vending</span></span>
+      </a>
+
+      <!-- Links -->
+      <div class="hidden md:flex items-center gap-8">
+        <a href="#how-it-works" class="nav-link">How It Works</a>
+        <a href="#features" class="nav-link">The Machine</a>
+        <a href="#testimonials" class="nav-link">Clients</a>
+        <a href="#contact" class="nav-link">Contact</a>
+      </div>
+
+      <!-- CTA -->
+      <a href="#contact" class="btn-primary hidden md:inline-flex items-center gap-2 px-5 py-2.5 rounded-lg font-display font-600 text-white text-sm" style="font-weight: 600;">
+        Get a Machine
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7H12M12 7L8 3M12 7L8 11" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="relative min-h-screen flex items-center overflow-hidden glow-purple glow-cyan" style="padding-top: 80px;">
+    <!-- Background decorative elements -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+      <!-- Grid lines -->
+      <div class="absolute inset-0" style="background-image: linear-gradient(rgba(168,85,247,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(168,85,247,0.04) 1px, transparent 1px); background-size: 60px 60px;"></div>
+      <!-- Corner glow blobs -->
+      <div class="absolute -top-40 -left-40 w-96 h-96 rounded-full" style="background: radial-gradient(circle, rgba(168,85,247,0.2) 0%, transparent 70%); filter: blur(40px);"></div>
+      <div class="absolute -bottom-40 -right-40 w-96 h-96 rounded-full" style="background: radial-gradient(circle, rgba(34,211,238,0.15) 0%, transparent 70%); filter: blur(40px);"></div>
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] rounded-full" style="background: radial-gradient(ellipse, rgba(236,72,153,0.04) 0%, transparent 70%); filter: blur(60px);"></div>
+    </div>
+
+    <div class="relative max-w-7xl mx-auto px-6 lg:px-10 w-full py-24 lg:py-32">
+      <div class="grid lg:grid-cols-2 gap-16 items-center">
+
+        <!-- Text -->
+        <div>
+          <!-- Badge -->
+          <div class="hero-badge inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8">
+            <span class="pulse-dot w-2 h-2 rounded-full" style="background: #A855F7;"></span>
+            <span class="text-xs font-500 font-body" style="color: rgba(216,180,254,0.9); font-weight: 500;">Now Placing Machines in Miami & South Florida</span>
+          </div>
+
+          <h1 class="font-display font-800 text-white mb-6" style="font-size: clamp(2.8rem, 5vw, 4.5rem); line-height: 1.05; letter-spacing: -0.04em; font-weight: 800;">
+            Vaping,<br/>
+            <span class="grad-text">Automated.</span><br/>
+            <span style="color: rgba(226,232,240,0.8);">Effortless.</span>
+          </h1>
+
+          <p class="mb-10 text-lg" style="color: rgba(148,163,184,0.85); line-height: 1.75; max-width: 480px;">
+            Volt Vending machines turn your bar into a 24/7 revenue stream — no staff, no hassle. Just sleek hardware, smart tech, and customers who keep coming back.
+          </p>
+
+          <div class="flex flex-wrap gap-4">
+            <a href="#contact" class="btn-primary inline-flex items-center gap-2.5 px-7 py-3.5 rounded-xl font-display text-white font-600" style="font-size: 1rem; font-weight: 600;">
+              Get a Machine
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8H13M13 8L9 4M13 8L9 12" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+            <a href="#how-it-works" class="btn-outline inline-flex items-center gap-2.5 px-7 py-3.5 rounded-xl font-display font-600" style="font-size: 1rem; font-weight: 600;">
+              See How It Works
+            </a>
+          </div>
+
+          <!-- Stats row -->
+          <div class="flex gap-8 mt-12 pt-10" style="border-top: 1px solid rgba(168,85,247,0.12);">
+            <div>
+              <div class="font-display font-800 text-2xl grad-text-2" style="font-weight: 800; letter-spacing: -0.03em;">50+</div>
+              <div class="text-sm mt-0.5" style="color: rgba(148,163,184,0.6);">Active Locations</div>
+            </div>
+            <div style="width: 1px; background: rgba(168,85,247,0.15);"></div>
+            <div>
+              <div class="font-display font-800 text-2xl grad-text-2" style="font-weight: 800; letter-spacing: -0.03em;">$0</div>
+              <div class="text-sm mt-0.5" style="color: rgba(148,163,184,0.6);">Upfront Cost</div>
+            </div>
+            <div style="width: 1px; background: rgba(168,85,247,0.15);"></div>
+            <div>
+              <div class="font-display font-800 text-2xl grad-text-2" style="font-weight: 800; letter-spacing: -0.03em;">24/7</div>
+              <div class="text-sm mt-0.5" style="color: rgba(148,163,184,0.6);">Revenue</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Machine Graphic -->
+        <div class="flex justify-center lg:justify-end float-anim">
+          <div class="relative">
+            <!-- Glow behind machine -->
+            <div class="absolute inset-0 scale-110" style="background: radial-gradient(ellipse, rgba(168,85,247,0.3) 0%, rgba(34,211,238,0.15) 40%, transparent 70%); filter: blur(40px);"></div>
+
+            <!-- Machine body -->
+            <div class="machine-body relative rounded-2xl overflow-hidden" style="width: 280px; min-height: 460px;">
+              <!-- Top bar -->
+              <div class="px-5 pt-5 pb-3 flex items-center justify-between" style="border-bottom: 1px solid rgba(168,85,247,0.15);">
+                <div class="flex gap-1.5">
+                  <div class="w-2.5 h-2.5 rounded-full" style="background: #A855F7; box-shadow: 0 0 8px rgba(168,85,247,0.8);"></div>
+                  <div class="w-2.5 h-2.5 rounded-full" style="background: #22D3EE; box-shadow: 0 0 8px rgba(34,211,238,0.8);"></div>
+                  <div class="w-2.5 h-2.5 rounded-full" style="background: #EC4899; box-shadow: 0 0 8px rgba(236,72,153,0.8);"></div>
+                </div>
+                <span class="text-xs font-display" style="color: rgba(168,85,247,0.8); font-weight: 600; letter-spacing: 0.1em;">VOLT v2.1</span>
+              </div>
+
+              <!-- Screen -->
+              <div class="mx-4 mt-4 screen-glow rounded-xl p-4 mb-4" style="min-height: 140px;">
+                <div class="text-xs mb-3 font-display font-600" style="color: #22D3EE; letter-spacing: 0.08em;">SELECT PRODUCT</div>
+                <div class="grid grid-cols-3 gap-2">
+                  <div class="rounded-lg p-2 text-center" style="background: rgba(168,85,247,0.12); border: 1px solid rgba(168,85,247,0.25);">
+                    <div class="text-lg">🟣</div>
+                    <div class="text-xs mt-1" style="color: rgba(216,180,254,0.8);">Berry</div>
+                  </div>
+                  <div class="rounded-lg p-2 text-center" style="background: rgba(34,211,238,0.12); border: 1px solid rgba(34,211,238,0.35);">
+                    <div class="text-lg">🔵</div>
+                    <div class="text-xs mt-1" style="color: rgba(165,243,252,0.8);">Ice</div>
+                  </div>
+                  <div class="rounded-lg p-2 text-center" style="background: rgba(236,72,153,0.1); border: 1px solid rgba(236,72,153,0.2);">
+                    <div class="text-lg">🩷</div>
+                    <div class="text-xs mt-1" style="color: rgba(251,207,232,0.8);">Rose</div>
+                  </div>
+                  <div class="rounded-lg p-2 text-center" style="background: rgba(168,85,247,0.08); border: 1px solid rgba(168,85,247,0.15);">
+                    <div class="text-lg">🍋</div>
+                    <div class="text-xs mt-1" style="color: rgba(216,180,254,0.6);">Citrus</div>
+                  </div>
+                  <div class="rounded-lg p-2 text-center" style="background: rgba(34,211,238,0.08); border: 1px solid rgba(34,211,238,0.15);">
+                    <div class="text-lg">🌿</div>
+                    <div class="text-xs mt-1" style="color: rgba(165,243,252,0.6);">Mint</div>
+                  </div>
+                  <div class="rounded-lg p-2 text-center" style="background: rgba(168,85,247,0.08); border: 1px solid rgba(168,85,247,0.15);">
+                    <div class="text-lg">🍑</div>
+                    <div class="text-xs mt-1" style="color: rgba(216,180,254,0.6);">Peach</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Card tap area -->
+              <div class="mx-4 rounded-xl p-4 mb-4 flex items-center gap-3" style="background: rgba(34,211,238,0.06); border: 1px solid rgba(34,211,238,0.2);">
+                <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style="background: rgba(34,211,238,0.15); border: 1px solid rgba(34,211,238,0.3);">
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <rect x="2" y="5" width="16" height="11" rx="2" stroke="#22D3EE" stroke-width="1.5"/>
+                    <path d="M2 9H18" stroke="#22D3EE" stroke-width="1.5"/>
+                    <circle cx="6" cy="13" r="1" fill="#22D3EE"/>
+                  </svg>
+                </div>
+                <div>
+                  <div class="text-xs font-display font-600" style="color: #22D3EE;">TAP TO PAY</div>
+                  <div class="text-xs mt-0.5" style="color: rgba(148,163,184,0.5);">Apple Pay · Google Pay · Card</div>
+                </div>
+              </div>
+
+              <!-- Age verify strip -->
+              <div class="mx-4 mb-5 rounded-lg px-3 py-2 flex items-center gap-2" style="background: rgba(168,85,247,0.08); border: 1px solid rgba(168,85,247,0.2);">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="#A855F7" stroke-width="1.2"/><path d="M7 4V7L9 9" stroke="#A855F7" stroke-width="1.2" stroke-linecap="round"/></svg>
+                <span class="text-xs" style="color: rgba(216,180,254,0.7);">Age verification required · 21+</span>
+              </div>
+
+              <!-- Bottom dispense slot -->
+              <div class="mx-4 mb-5 rounded-lg" style="height: 28px; background: rgba(0,0,0,0.4); border: 1px solid rgba(168,85,247,0.15); box-shadow: inset 0 2px 8px rgba(0,0,0,0.5);"></div>
+
+              <!-- Branding strip -->
+              <div class="px-4 py-3 flex items-center justify-center" style="background: rgba(168,85,247,0.05); border-top: 1px solid rgba(168,85,247,0.1);">
+                <span class="font-display text-sm font-800" style="letter-spacing: -0.02em; font-weight: 800;">
+                  <span style="color: #A855F7;">VOLT</span><span style="color: rgba(226,232,240,0.5);">VENDING</span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- HOW IT WORKS -->
+  <section id="how-it-works" class="relative py-28 overflow-hidden">
+    <div class="absolute inset-0" style="background: radial-gradient(ellipse 70% 60% at 50% 50%, rgba(34,211,238,0.05) 0%, transparent 70%);"></div>
+
+    <div class="relative max-w-7xl mx-auto px-6 lg:px-10">
+      <div class="text-center mb-16 reveal">
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-5 text-xs font-600 font-body" style="background: rgba(34,211,238,0.08); border: 1px solid rgba(34,211,238,0.2); color: #22D3EE; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;">How It Works</div>
+        <h2 class="font-display font-800 text-white mb-4" style="font-size: clamp(2rem, 3.5vw, 3rem); letter-spacing: -0.03em; font-weight: 800;">Up and running in<br/><span class="grad-text-2">three simple steps</span></h2>
+        <p style="color: rgba(148,163,184,0.7); max-width: 480px; margin: 0 auto; line-height: 1.7;">From zero to revenue-generating in under a week. No staff changes, no new permits, no complexity.</p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-6 lg:gap-8">
+
+        <!-- Step 1 -->
+        <div class="card-glow rounded-2xl p-8 reveal" style="transition-delay: 0.1s;">
+          <div class="step-num w-12 h-12 rounded-xl flex items-center justify-center mb-6">
+            <span class="font-display font-800 text-lg grad-text" style="font-weight: 800;">01</span>
+          </div>
+          <h3 class="font-display font-700 text-white text-xl mb-3" style="font-weight: 700; letter-spacing: -0.02em;">We Handle Setup</h3>
+          <p style="color: rgba(148,163,184,0.7); line-height: 1.75;">We deliver, install, and configure your Volt machine at zero upfront cost. Our team handles everything — you just pick the spot.</p>
+          <div class="mt-6 flex items-center gap-2 text-sm" style="color: rgba(168,85,247,0.8);">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8L6.5 11.5L13 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Free installation & service
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="card-glow rounded-2xl p-8 reveal" style="transition-delay: 0.2s;">
+          <div class="step-num w-12 h-12 rounded-xl flex items-center justify-center mb-6">
+            <span class="font-display font-800 text-lg grad-text" style="font-weight: 800;">02</span>
+          </div>
+          <h3 class="font-display font-700 text-white text-xl mb-3" style="font-weight: 700; letter-spacing: -0.02em;">Customers Buy, Instantly</h3>
+          <p style="color: rgba(148,163,184,0.7); line-height: 1.75;">Guests tap to pay with Apple Pay, Google Pay, or card. Age verification is handled automatically — no staff involvement needed.</p>
+          <div class="mt-6 flex items-center gap-2 text-sm" style="color: rgba(34,211,238,0.8);">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8L6.5 11.5L13 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Contactless & compliant
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="card-glow rounded-2xl p-8 reveal" style="transition-delay: 0.3s;">
+          <div class="step-num w-12 h-12 rounded-xl flex items-center justify-center mb-6">
+            <span class="font-display font-800 text-lg grad-text" style="font-weight: 800;">03</span>
+          </div>
+          <h3 class="font-display font-700 text-white text-xl mb-3" style="font-weight: 700; letter-spacing: -0.02em;">You Earn, We Restock</h3>
+          <p style="color: rgba(148,163,184,0.7); line-height: 1.75;">Revenue goes straight to your payout. We monitor stock remotely and handle refills before you even notice — hands-free income.</p>
+          <div class="mt-6 flex items-center gap-2 text-sm" style="color: rgba(168,85,247,0.8);">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8L6.5 11.5L13 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Passive revenue, zero effort
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- FEATURES / THE MACHINE -->
+  <section id="features" class="relative py-28 overflow-hidden">
+    <div class="absolute inset-0 glow-purple" style="opacity: 0.6;"></div>
+
+    <div class="relative max-w-7xl mx-auto px-6 lg:px-10">
+      <div class="grid lg:grid-cols-2 gap-16 items-center">
+
+        <!-- Features list -->
+        <div>
+          <div class="reveal">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-5 text-xs font-600 font-body" style="background: rgba(168,85,247,0.08); border: 1px solid rgba(168,85,247,0.2); color: #A855F7; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;">The Machine</div>
+            <h2 class="font-display font-800 text-white mb-4" style="font-size: clamp(2rem, 3.5vw, 3rem); letter-spacing: -0.03em; font-weight: 800;">Hardware built for<br/><span class="grad-text">nightlife environments</span></h2>
+            <p class="mb-10" style="color: rgba(148,163,184,0.7); line-height: 1.75; max-width: 480px;">Every detail designed to handle a packed Friday night — from impact-proof glass to spill-resistant internals and remote monitoring.</p>
+          </div>
+
+          <div class="space-y-4">
+
+            <div class="card-cyan rounded-xl p-5 flex items-start gap-4 reveal" style="transition-delay: 0.1s;">
+              <div class="icon-wrap-cyan w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2L12.5 7.5H18L13.5 11L15.5 17L10 13.5L4.5 17L6.5 11L2 7.5H7.5L10 2Z" stroke="#22D3EE" stroke-width="1.4" stroke-linejoin="round"/></svg>
+              </div>
+              <div>
+                <div class="font-display font-600 text-white mb-1" style="font-weight: 600;">Smart Age Verification</div>
+                <div class="text-sm" style="color: rgba(148,163,184,0.65); line-height: 1.65;">ID scanning + face-match tech confirms customers are 21+ in under 3 seconds. Fully compliant, fully automated.</div>
+              </div>
+            </div>
+
+            <div class="card-glow rounded-xl p-5 flex items-start gap-4 reveal" style="transition-delay: 0.2s;">
+              <div class="icon-wrap w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="6" width="14" height="9" rx="2" stroke="#A855F7" stroke-width="1.4"/><path d="M7 6V5C7 3.9 7.9 3 9 3H11C12.1 3 13 3.9 13 5V6" stroke="#A855F7" stroke-width="1.4" stroke-linecap="round"/><path d="M10 10V13" stroke="#A855F7" stroke-width="1.4" stroke-linecap="round"/><circle cx="10" cy="10" r="1.5" fill="#A855F7"/></svg>
+              </div>
+              <div>
+                <div class="font-display font-600 text-white mb-1" style="font-weight: 600;">Tamper-Proof Design</div>
+                <div class="text-sm" style="color: rgba(148,163,184,0.65); line-height: 1.65;">Aircraft-grade aluminum chassis with anti-vandal sensors. Built to survive the bar floor — drinks, crowds, and all.</div>
+              </div>
+            </div>
+
+            <div class="card-cyan rounded-xl p-5 flex items-start gap-4 reveal" style="transition-delay: 0.3s;">
+              <div class="icon-wrap-cyan w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 10C3 6.1 6.1 3 10 3C13.9 3 17 6.1 17 10C17 13.9 13.9 17 10 17" stroke="#22D3EE" stroke-width="1.4" stroke-linecap="round"/><path d="M3 13L6 10L3 7" stroke="#22D3EE" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 7V10L12 12" stroke="#22D3EE" stroke-width="1.4" stroke-linecap="round"/></svg>
+              </div>
+              <div>
+                <div class="font-display font-600 text-white mb-1" style="font-weight: 600;">Real-Time Remote Dashboard</div>
+                <div class="text-sm" style="color: rgba(148,163,184,0.65); line-height: 1.65;">Monitor inventory, sales, and machine health from your phone. We get alerts before stock runs out so you never miss a sale.</div>
+              </div>
+            </div>
+
+            <div class="card-glow rounded-xl p-5 flex items-start gap-4 reveal" style="transition-delay: 0.4s;">
+              <div class="icon-wrap w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7" stroke="#A855F7" stroke-width="1.4"/><path d="M10 6V10L13 12" stroke="#A855F7" stroke-width="1.4" stroke-linecap="round"/></svg>
+              </div>
+              <div>
+                <div class="font-display font-600 text-white mb-1" style="font-weight: 600;">24/7 Sales, Zero Downtime</div>
+                <div class="text-sm" style="color: rgba(148,163,184,0.65); line-height: 1.65;">Sells whether you're open or closed — happy hour, last call, after-hours. Every minute is a revenue opportunity.</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Right visual -->
+        <div class="reveal flex flex-col gap-6">
+          <!-- Big stat card -->
+          <div class="card-glow rounded-2xl p-8" style="background: linear-gradient(145deg, rgba(168,85,247,0.08), rgba(34,211,238,0.04));">
+            <div class="font-display font-800 mb-1 grad-text" style="font-size: 3.5rem; line-height: 1; letter-spacing: -0.04em; font-weight: 800;">$2,400+</div>
+            <div class="font-display font-600 text-white text-lg mb-2" style="font-weight: 600;">avg. monthly revenue per location</div>
+            <p class="text-sm" style="color: rgba(148,163,184,0.6); line-height: 1.65;">Based on current partner locations. High-volume bars see upwards of $4,000/mo.</p>
+          </div>
+
+          <!-- Two small cards -->
+          <div class="grid grid-cols-2 gap-6">
+            <div class="card-cyan rounded-2xl p-6 text-center">
+              <div class="font-display font-800 text-3xl grad-text-2 mb-1" style="font-weight: 800; letter-spacing: -0.03em;">18</div>
+              <div class="font-display font-600 text-white text-sm mb-1" style="font-weight: 600;">SKUs Available</div>
+              <div class="text-xs" style="color: rgba(148,163,184,0.5);">Top brands stocked</div>
+            </div>
+            <div class="card-glow rounded-2xl p-6 text-center">
+              <div class="font-display font-800 text-3xl grad-text mb-1" style="font-weight: 800; letter-spacing: -0.03em;">48h</div>
+              <div class="font-display font-600 text-white text-sm mb-1" style="font-weight: 600;">Install Time</div>
+              <div class="text-xs" style="color: rgba(148,163,184,0.5);">From call to live</div>
+            </div>
+          </div>
+
+          <!-- Compliance note -->
+          <div class="rounded-xl px-5 py-4 flex items-center gap-3" style="background: rgba(34,211,238,0.05); border: 1px solid rgba(34,211,238,0.15);">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" class="flex-shrink-0"><path d="M9 2L3 5V9C3 12.3 5.7 15.4 9 16C12.3 15.4 15 12.3 15 9V5L9 2Z" stroke="#22D3EE" stroke-width="1.4" stroke-linejoin="round"/><path d="M6.5 9L8 10.5L11.5 7" stroke="#22D3EE" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <div class="text-sm" style="color: rgba(165,243,252,0.8);">FDA-compliant hardware · State-licensed products · Automated 21+ enforcement</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- TESTIMONIALS -->
+  <section id="testimonials" class="relative py-28 overflow-hidden">
+    <div class="absolute inset-0" style="background: radial-gradient(ellipse 80% 60% at 50% 50%, rgba(168,85,247,0.04) 0%, transparent 70%);"></div>
+
+    <div class="relative max-w-7xl mx-auto px-6 lg:px-10">
+      <div class="text-center mb-16 reveal">
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-5 text-xs font-600 font-body" style="background: rgba(236,72,153,0.08); border: 1px solid rgba(236,72,153,0.2); color: #EC4899; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;">Happy Partners</div>
+        <h2 class="font-display font-800 text-white mb-4" style="font-size: clamp(2rem, 3.5vw, 3rem); letter-spacing: -0.03em; font-weight: 800;">Bars love it.<br/><span class="grad-text">Customers love it more.</span></h2>
+        <p style="color: rgba(148,163,184,0.7); max-width: 480px; margin: 0 auto; line-height: 1.7;">From dive bars to upscale lounges — Volt Vending fits every venue and wins over every crowd.</p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-6 lg:gap-8">
+
+        <!-- Testimonial 1 -->
+        <div class="card-glow rounded-2xl p-7 reveal" style="transition-delay: 0.1s;">
+          <div class="flex gap-1 mb-5">
+            <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+          </div>
+          <p class="mb-6 text-base" style="color: rgba(226,232,240,0.8); line-height: 1.75;">"We were skeptical at first — but this thing prints money on weekends. Customers are obsessed with it. Staff loves it because they don't have to deal with it."</p>
+          <div class="flex items-center gap-3" style="border-top: 1px solid rgba(168,85,247,0.1); padding-top: 20px;">
+            <img src="https://placehold.co/44x44/1a1a35/A855F7?text=MR" alt="Marcus R." class="w-11 h-11 rounded-full" />
+            <div>
+              <div class="font-display font-600 text-white text-sm" style="font-weight: 600;">Marcus R.</div>
+              <div class="text-xs mt-0.5" style="color: rgba(148,163,184,0.5);">Owner · Neon Lounge, Miami</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Testimonial 2 -->
+        <div class="card-glow rounded-2xl p-7 reveal" style="transition-delay: 0.2s; border-color: rgba(34,211,238,0.25);">
+          <div class="flex gap-1 mb-5">
+            <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+          </div>
+          <p class="mb-6 text-base" style="color: rgba(226,232,240,0.8); line-height: 1.75;">"The machine is sleek — it actually looks good in our space. Our customers ask about it constantly. We've had zero issues and the Volt team handles everything."</p>
+          <div class="flex items-center gap-3" style="border-top: 1px solid rgba(34,211,238,0.1); padding-top: 20px;">
+            <img src="https://placehold.co/44x44/0d1a1a/22D3EE?text=JL" alt="Jada L." class="w-11 h-11 rounded-full" />
+            <div>
+              <div class="font-display font-600 text-white text-sm" style="font-weight: 600;">Jada L.</div>
+              <div class="text-xs mt-0.5" style="color: rgba(148,163,184,0.5);">Manager · Skyline Rooftop, Fort Lauderdale</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Testimonial 3 -->
+        <div class="card-glow rounded-2xl p-7 reveal" style="transition-delay: 0.3s;">
+          <div class="flex gap-1 mb-5">
+            <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+          </div>
+          <p class="mb-6 text-base" style="color: rgba(226,232,240,0.8); line-height: 1.75;">"Between Thursday and Saturday we're pulling in close to $900 just from the machine. It basically pays for itself every week. I wish we'd done it a year ago."</p>
+          <div class="flex items-center gap-3" style="border-top: 1px solid rgba(168,85,247,0.1); padding-top: 20px;">
+            <img src="https://placehold.co/44x44/1a1535/A855F7?text=TC" alt="Tony C." class="w-11 h-11 rounded-full" />
+            <div>
+              <div class="font-display font-600 text-white text-sm" style="font-weight: 600;">Tony C.</div>
+              <div class="text-xs mt-0.5" style="color: rgba(148,163,184,0.5);">Owner · Casa Blanca Bar, Brickell</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Logos strip -->
+      <div class="mt-16 reveal">
+        <div class="text-center text-xs mb-8 font-body" style="color: rgba(148,163,184,0.35); letter-spacing: 0.12em; text-transform: uppercase; font-weight: 500;">Trusted by venues across South Florida</div>
+        <div class="flex flex-wrap justify-center items-center gap-8 lg:gap-16">
+          <div class="font-display font-700 text-lg" style="color: rgba(148,163,184,0.2); letter-spacing: -0.02em; font-weight: 700;">NEON LOUNGE</div>
+          <div class="font-display font-700 text-lg" style="color: rgba(148,163,184,0.2); letter-spacing: -0.02em; font-weight: 700;">SKYLINE</div>
+          <div class="font-display font-700 text-lg" style="color: rgba(148,163,184,0.2); letter-spacing: -0.02em; font-weight: 700;">CASA BLANCA</div>
+          <div class="font-display font-700 text-lg" style="color: rgba(148,163,184,0.2); letter-spacing: -0.02em; font-weight: 700;">THE YARD</div>
+          <div class="font-display font-700 text-lg" style="color: rgba(148,163,184,0.2); letter-spacing: -0.02em; font-weight: 700;">DISTRICT 11</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- CONTACT / CTA -->
+  <section id="contact" class="relative py-28 overflow-hidden">
+    <div class="absolute inset-0" style="background: radial-gradient(ellipse 60% 80% at 50% 50%, rgba(168,85,247,0.08) 0%, rgba(34,211,238,0.04) 40%, transparent 70%);"></div>
+
+    <div class="relative max-w-4xl mx-auto px-6 lg:px-10">
+      <div class="text-center mb-12 reveal">
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-5 text-xs font-600 font-body" style="background: rgba(168,85,247,0.08); border: 1px solid rgba(168,85,247,0.2); color: #A855F7; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;">Get Started</div>
+        <h2 class="font-display font-800 text-white mb-4" style="font-size: clamp(2rem, 3.5vw, 3rem); letter-spacing: -0.03em; font-weight: 800;">Ready to turn your bar<br/>into a <span class="grad-text">revenue machine?</span></h2>
+        <p style="color: rgba(148,163,184,0.7); max-width: 440px; margin: 0 auto; line-height: 1.7;">Tell us about your venue. We'll reach out within 24 hours to set up a free consultation — no commitment required.</p>
+      </div>
+
+      <div class="card-glow rounded-3xl p-8 lg:p-12 reveal">
+        <form onsubmit="handleSubmit(event)">
+          <div class="grid md:grid-cols-2 gap-5 mb-5">
+            <div>
+              <label class="block text-xs font-600 mb-2 font-body" style="color: rgba(168,85,247,0.8); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;">Your Name</label>
+              <input type="text" placeholder="John Smith" class="form-input w-full px-4 py-3 rounded-xl text-sm" />
+            </div>
+            <div>
+              <label class="block text-xs font-600 mb-2 font-body" style="color: rgba(168,85,247,0.8); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;">Venue Name</label>
+              <input type="text" placeholder="Club Nova" class="form-input w-full px-4 py-3 rounded-xl text-sm" />
+            </div>
+          </div>
+          <div class="grid md:grid-cols-2 gap-5 mb-5">
+            <div>
+              <label class="block text-xs font-600 mb-2 font-body" style="color: rgba(168,85,247,0.8); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;">Email</label>
+              <input type="email" placeholder="you@venuename.com" class="form-input w-full px-4 py-3 rounded-xl text-sm" />
+            </div>
+            <div>
+              <label class="block text-xs font-600 mb-2 font-body" style="color: rgba(168,85,247,0.8); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;">Phone</label>
+              <input type="tel" placeholder="(305) 000-0000" class="form-input w-full px-4 py-3 rounded-xl text-sm" />
+            </div>
+          </div>
+          <div class="mb-6">
+            <label class="block text-xs font-600 mb-2 font-body" style="color: rgba(168,85,247,0.8); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;">Tell us about your venue</label>
+            <textarea rows="4" placeholder="How many nights per week are you open? Avg. foot traffic? Any other vending machines on site?" class="form-input w-full px-4 py-3 rounded-xl text-sm resize-none"></textarea>
+          </div>
+          <button type="submit" class="btn-primary w-full py-4 rounded-xl font-display font-700 text-white text-base flex items-center justify-center gap-3" style="font-weight: 700; font-size: 1rem;">
+            Get My Free Consultation
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 9H15M15 9L10 4M15 9L10 14" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div id="form-success" class="hidden mt-4 text-center py-3 rounded-xl text-sm font-600" style="background: rgba(34,211,238,0.1); border: 1px solid rgba(34,211,238,0.3); color: #22D3EE; font-weight: 600;">
+            ✓ Message sent! We'll be in touch within 24 hours.
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="relative py-12" style="border-top: 1px solid rgba(168,85,247,0.1);">
+    <div class="max-w-7xl mx-auto px-6 lg:px-10">
+      <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+        <!-- Logo -->
+        <div class="flex items-center gap-2.5">
+          <div class="w-7 h-7 rounded-lg flex items-center justify-center" style="background: linear-gradient(135deg, #A855F7, #22D3EE);">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+              <path d="M9 2L4 9H8L7 14L12 7H8L9 2Z" fill="white" stroke="white" stroke-width="0.5" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <span class="font-display font-700 text-white" style="letter-spacing: -0.03em; font-weight: 700;">Volt<span class="grad-text">Vending</span></span>
+        </div>
+
+        <!-- Links -->
+        <div class="flex items-center gap-6">
+          <a href="#how-it-works" class="nav-link">How It Works</a>
+          <a href="#features" class="nav-link">Machine</a>
+          <a href="#testimonials" class="nav-link">Clients</a>
+          <a href="#contact" class="nav-link">Contact</a>
+        </div>
+
+        <!-- Legal -->
+        <div class="text-xs text-center md:text-right" style="color: rgba(148,163,184,0.3);">
+          © 2025 Volt Vending LLC · For adults 21+ only
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Scroll reveal
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    // Form submit
+    function handleSubmit(e) {
+      e.preventDefault();
+      const btn = e.target.querySelector('button[type="submit"]');
+      btn.disabled = true;
+      btn.textContent = 'Sending...';
+      setTimeout(() => {
+        btn.style.display = 'none';
+        document.getElementById('form-success').classList.remove('hidden');
+      }, 800);
+    }
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        const id = a.getAttribute('href');
+        const el = document.querySelector(id);
+        if (el) {
+          e.preventDefault();
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+  </script>
+</body>
+</html>
