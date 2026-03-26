@@ -324,6 +324,7 @@
         <a href="#how-it-works" class="nav-link">How It Works</a>
         <a href="#features" class="nav-link">The Machine</a>
         <a href="#testimonials" class="nav-link">Clients</a>
+        <a href="#calculator" class="nav-link">Calculator</a>
         <a href="#contact" class="nav-link">Contact</a>
       </div>
 
@@ -713,6 +714,182 @@
       </div>
     </div>
   </section>
+
+  <div class="divider"></div>
+
+  <!-- INCOME CALCULATOR -->
+  <section id="calculator" class="relative py-28 overflow-hidden">
+    <div class="absolute inset-0" style="background: radial-gradient(ellipse 60% 70% at 30% 50%, rgba(168,85,247,0.07) 0%, transparent 70%), radial-gradient(ellipse 50% 60% at 80% 40%, rgba(34,211,238,0.06) 0%, transparent 70%);"></div>
+
+    <div class="relative max-w-5xl mx-auto px-6 lg:px-10">
+      <div class="text-center mb-12 reveal">
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-5 text-xs font-body" style="background: rgba(34,211,238,0.08); border: 1px solid rgba(34,211,238,0.2); color: #22D3EE; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;">Revenue Calculator</div>
+        <h2 class="font-display font-800 text-white mb-4" style="font-size: clamp(2rem, 3.5vw, 3rem); letter-spacing: -0.03em; font-weight: 800;">See what your bar<br/><span class="grad-text">could be earning</span></h2>
+        <p style="color: rgba(148,163,184,0.7); max-width: 460px; margin: 0 auto; line-height: 1.7;">Adjust the sliders to match your bar's traffic and see your estimated monthly and annual revenue from a Volt Vending machine.</p>
+      </div>
+
+      <div class="card-glow rounded-3xl p-8 lg:p-12 reveal">
+        <div class="grid lg:grid-cols-2 gap-10 lg:gap-16 items-start">
+
+          <!-- Sliders -->
+          <div class="space-y-8">
+
+            <!-- Nights per week -->
+            <div>
+              <div class="flex justify-between items-center mb-3">
+                <label class="font-display font-600 text-white text-sm" style="font-weight: 600;">Nights open per week</label>
+                <span id="lbl-nights" class="font-display font-700 text-lg grad-text" style="font-weight: 700; min-width: 32px; text-align: right;">5</span>
+              </div>
+              <input type="range" id="sl-nights" min="1" max="7" value="5" step="1" class="calc-slider w-full" oninput="calcUpdate()" />
+              <div class="flex justify-between text-xs mt-1.5" style="color: rgba(148,163,184,0.35);">
+                <span>1 night</span><span>7 nights</span>
+              </div>
+            </div>
+
+            <!-- Avg customers per night -->
+            <div>
+              <div class="flex justify-between items-center mb-3">
+                <label class="font-display font-600 text-white text-sm" style="font-weight: 600;">Avg. customers per night</label>
+                <span id="lbl-customers" class="font-display font-700 text-lg grad-text" style="font-weight: 700; min-width: 48px; text-align: right;">150</span>
+              </div>
+              <input type="range" id="sl-customers" min="20" max="500" value="150" step="10" class="calc-slider w-full" oninput="calcUpdate()" />
+              <div class="flex justify-between text-xs mt-1.5" style="color: rgba(148,163,184,0.35);">
+                <span>20</span><span>500+</span>
+              </div>
+            </div>
+
+            <!-- Purchase rate -->
+            <div>
+              <div class="flex justify-between items-center mb-3">
+                <label class="font-display font-600 text-white text-sm" style="font-weight: 600;">Est. purchase rate</label>
+                <span id="lbl-rate" class="font-display font-700 text-lg grad-text" style="font-weight: 700; min-width: 40px; text-align: right;">8%</span>
+              </div>
+              <input type="range" id="sl-rate" min="2" max="20" value="8" step="1" class="calc-slider w-full" oninput="calcUpdate()" />
+              <div class="flex justify-between text-xs mt-1.5" style="color: rgba(148,163,184,0.35);">
+                <span>2% (slow)</span><span>20% (peak)</span>
+              </div>
+            </div>
+
+            <!-- Avg sale price -->
+            <div>
+              <div class="flex justify-between items-center mb-3">
+                <label class="font-display font-600 text-white text-sm" style="font-weight: 600;">Avg. sale price per unit</label>
+                <span id="lbl-price" class="font-display font-700 text-lg grad-text" style="font-weight: 700; min-width: 48px; text-align: right;">$18</span>
+              </div>
+              <input type="range" id="sl-price" min="10" max="30" value="18" step="1" class="calc-slider w-full" oninput="calcUpdate()" />
+              <div class="flex justify-between text-xs mt-1.5" style="color: rgba(148,163,184,0.35);">
+                <span>$10</span><span>$30</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Results -->
+          <div class="flex flex-col gap-5">
+
+            <!-- Revenue breakdown -->
+            <div class="rounded-2xl p-6" style="background: linear-gradient(145deg, rgba(168,85,247,0.1), rgba(34,211,238,0.06)); border: 1px solid rgba(168,85,247,0.25);">
+              <div class="text-xs font-600 mb-4 font-body" style="color: rgba(168,85,247,0.8); font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;">Your Estimated Revenue</div>
+              <div class="space-y-4">
+                <div class="flex justify-between items-center">
+                  <span class="text-sm" style="color: rgba(148,163,184,0.7);">Per night</span>
+                  <span id="res-night" class="font-display font-700 text-white" style="font-weight: 700; font-size: 1.1rem;">$216</span>
+                </div>
+                <div style="height:1px; background: rgba(168,85,247,0.1);"></div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm" style="color: rgba(148,163,184,0.7);">Per week</span>
+                  <span id="res-week" class="font-display font-700 text-white" style="font-weight: 700; font-size: 1.1rem;">$1,080</span>
+                </div>
+                <div style="height:1px; background: rgba(168,85,247,0.1);"></div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm" style="color: rgba(148,163,184,0.7);">Per month</span>
+                  <span id="res-month" class="font-display font-700 text-white" style="font-weight: 700; font-size: 1.25rem;">$4,320</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Annual highlight -->
+            <div class="rounded-2xl p-6 text-center" style="background: linear-gradient(135deg, rgba(168,85,247,0.15), rgba(34,211,238,0.1)); border: 1px solid rgba(168,85,247,0.35); box-shadow: 0 0 40px rgba(168,85,247,0.1) inset;">
+              <div class="text-xs font-600 mb-2 font-body" style="color: rgba(168,85,247,0.7); font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;">Annual Estimate</div>
+              <div id="res-year" class="font-display font-800 grad-text mb-1" style="font-size: 3rem; line-height: 1; letter-spacing: -0.04em; font-weight: 800;">$51,840</div>
+              <div class="text-sm" style="color: rgba(148,163,184,0.5);">in passive bar revenue</div>
+            </div>
+
+            <!-- Disclaimer -->
+            <p class="text-xs text-center" style="color: rgba(148,163,184,0.35); line-height: 1.6;">Estimates based on average partner performance. Actual results vary by venue, location, and traffic patterns.</p>
+
+            <a href="#contact" class="btn-primary inline-flex items-center justify-center gap-2 w-full py-3.5 rounded-xl font-display font-700 text-white text-sm" style="font-weight: 700;">
+              Get This Revenue for Your Bar
+              <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M2.5 7.5H12.5M12.5 7.5L8.5 3.5M12.5 7.5L8.5 11.5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <style>
+    .calc-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      height: 4px;
+      border-radius: 2px;
+      background: rgba(168,85,247,0.2);
+      outline: none;
+      cursor: pointer;
+    }
+    .calc-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #A855F7, #7C3AED);
+      cursor: pointer;
+      box-shadow: 0 0 12px rgba(168,85,247,0.6);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .calc-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+      box-shadow: 0 0 20px rgba(168,85,247,0.9);
+    }
+    .calc-slider::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #A855F7, #7C3AED);
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 0 12px rgba(168,85,247,0.6);
+    }
+  </style>
+
+  <script>
+    function calcUpdate() {
+      const nights  = parseInt(document.getElementById('sl-nights').value);
+      const customers = parseInt(document.getElementById('sl-customers').value);
+      const rate    = parseInt(document.getElementById('sl-rate').value) / 100;
+      const price   = parseInt(document.getElementById('sl-price').value);
+
+      document.getElementById('lbl-nights').textContent    = nights;
+      document.getElementById('lbl-customers').textContent = customers;
+      document.getElementById('lbl-rate').textContent      = (rate * 100) + '%';
+      document.getElementById('lbl-price').textContent     = '$' + price;
+
+      const perNight  = Math.round(customers * rate * price);
+      const perWeek   = perNight * nights;
+      const perMonth  = Math.round(perWeek * 4.33);
+      const perYear   = perMonth * 12;
+
+      const fmt = n => '$' + n.toLocaleString('en-US');
+
+      document.getElementById('res-night').textContent = fmt(perNight);
+      document.getElementById('res-week').textContent  = fmt(perWeek);
+      document.getElementById('res-month').textContent = fmt(perMonth);
+      document.getElementById('res-year').textContent  = fmt(perYear);
+    }
+    calcUpdate();
+  </script>
 
   <div class="divider"></div>
 
